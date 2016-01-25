@@ -13,4 +13,6 @@
 - (void)addPageWithView:(UIView*)view;
 
 @property(nonatomic,assign,readonly) NSInteger numberOfPages;
+
+@property(nonatomic, assign) NSInteger currentPage;
 @end

@@ -9,6 +9,10 @@
 #import "ViewController.h"
 #import "TWPageView.h"
 #import "UIColor+randomColor.h"
+#import "Masonry.h"
+
+#define WeakSelf(weakSelf)  __weak __typeof(&*self)weakSelf = self;
+
 @interface ViewController ()
 
 @end
@@ -20,8 +24,12 @@
     // Do any additional setup after loading the view, typically from a nib.
     
     //CGRect frame = self.view.bounds;
-    TWPageView *pageView = [[TWPageView alloc] initWithFrame:self.view.bounds];
+    WeakSelf(weakSelf);
+    TWPageView *pageView = [[TWPageView alloc] initWithFrame:CGRectZero];
     [self.view addSubview:pageView];
+    [pageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(weakSelf.view).with.insets(UIEdgeInsetsZero);
+    }];
     
     
     UIViewController *vc = [[UIViewController alloc]init];

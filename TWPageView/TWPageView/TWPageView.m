@@ -23,6 +23,8 @@
 
 @property (nonatomic, strong) NSMutableArray *subViewsArray;
 
+@property (nonatomic, assign)NSInteger previousPage;
+
 @end
 
 @implementation TWPageView
@@ -35,8 +37,6 @@
     }
     return self;
 }
-
-
 
 #pragma mark - public method
 - (void)addPageWithView:(UIView *)view
@@ -70,15 +70,31 @@
     self.pageControl.numberOfPages = _numberOfPages;
 }
 
+- (NSInteger)currentPage
+{
+    NSInteger currentPage = self.scrollView.contentOffset.x / self.frame.size.width;
+    return currentPage;
+}
+
 - (void)layoutSubviews
 {
     [super layoutSubviews];
     
     WeakSelf(weakSelf);
-    [self.contentView mas_updateConstraints:^(MASConstraintMaker *make) {
-        make.width.mas_equalTo(@(weakSelf.frame.size.width * self.numberOfPages));
-    }];
+//    [self.contentView mas_updateConstraints:^(MASConstraintMaker *make) {
+//        make.width.mas_equalTo(@(weakSelf.frame.size.width * self.numberOfPages));
+//    }];
+    
+    if (self.scrollView.contentSize.width != self.frame.size.width * self.numberOfPages) {
+        [self.contentView mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.width.mas_equalTo(@(weakSelf.frame.size.width * self.numberOfPages));
+        }];
+        [self.scrollView setContentOffset:CGPointMake(self.frame.size.width * self.previousPage, self.scrollView.contentOffset.y)];
+    } else {
+        self.previousPage = [self currentPage];
+    }
 }
+
 
 #pragma mark UIScrollView 代理
 -(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
@@ -86,8 +102,9 @@
     if(scrollView == self.scrollView)
     {
         CGFloat pageWidth = CGRectGetWidth(self.scrollView.frame);
-        NSInteger page = self.scrollView.contentOffset.x /pageWidth;
+        NSInteger page = self.scrollView.contentOffset.x / pageWidth;
         self.pageControl.currentPage = page;
+        self.previousPage = page;
     }
 }
 
@@ -103,6 +120,8 @@
 - (void)commonInit
 {
     _numberOfPages = 0;
+    self.previousPage = 0;
+    self.currentPage = 0;
     
     [self setupScrollView];
     [self setupPageControle];
