@@ -24,9 +24,9 @@
     [self.view addSubview:pageView];
     
     
-    UIView *view1 = [[UIView alloc]init];
-    view1.backgroundColor = [UIColor randomColor];
-    [pageView addPageWithView:view1];
+    UIViewController *vc = [[UIViewController alloc]init];
+    vc.view.backgroundColor = [UIColor redColor];
+    [pageView addPageWithView:vc.view];
     
     UIView *view2 = [[UIView alloc]init];
     view2.backgroundColor = [UIColor randomColor];

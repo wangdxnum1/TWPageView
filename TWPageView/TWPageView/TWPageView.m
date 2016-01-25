@@ -18,7 +18,7 @@
 @interface TWPageView ()<UIScrollViewDelegate>
 
 @property (nonatomic, weak) UIScrollView *scrollView;
-
+@property (nonatomic, weak) UIView *contentView;
 @property (nonatomic, weak) UIPageControl *pageControl;
 
 @property (nonatomic, strong) NSMutableArray *subViewsArray;
@@ -41,11 +41,31 @@
 #pragma mark - public method
 - (void)addPageWithView:(UIView *)view
 {
-    [self.scrollView addSubview:view];
-    
-    CGRect frame = CGRectMake(self.frame.size.width * _numberOfPages, 0, self.frame.size.width, self.frame.size.height);
+    [self.contentView addSubview:view];
+
     _numberOfPages++;
-    view.frame = frame;
+    
+    WeakSelf(weakSelf);
+    if(_numberOfPages == 1)
+    {
+        [view mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(weakSelf.contentView);
+            make.top.equalTo(weakSelf.contentView);
+            make.bottom.equalTo(weakSelf.contentView);
+            make.width.equalTo(weakSelf);
+        }];
+    }
+    else
+    {
+        UIView *leftView = [self.subViewsArray lastObject];
+        [view mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(leftView.mas_right);
+            make.top.equalTo(weakSelf.contentView);
+            make.bottom.equalTo(weakSelf.contentView);
+            make.width.equalTo(leftView);
+        }];
+    }
+    
     [self.subViewsArray addObject:view];
     self.pageControl.numberOfPages = _numberOfPages;
 }
@@ -53,7 +73,11 @@
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    self.scrollView.contentSize = CGSizeMake(self.frame.size.width * _numberOfPages, self.frame.size.height);
+    
+    WeakSelf(weakSelf);
+    [self.contentView mas_updateConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(@(weakSelf.frame.size.width * self.numberOfPages));
+    }];
 }
 
 #pragma mark UIScrollView 代理
@@ -101,6 +125,17 @@
     [self.scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(weakSelf).with.insets(UIEdgeInsetsZero);
     }];
+    
+    UIView *contentView = [[UIView alloc]initWithFrame:CGRectZero];
+    self.contentView = contentView;
+    [self.scrollView addSubview:contentView];
+    [contentView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self.scrollView);
+        
+        //make.width.equalTo(self.scrollView);
+        make.height.equalTo(self.scrollView);
+    }];
+    contentView.backgroundColor = [UIColor orangeColor];
     
     //self.scrollView.backgroundColor = [UIColor orangeColor];
 }
